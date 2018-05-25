@@ -2,12 +2,24 @@ import Modeler from 'lib/Modeler';
 import Viewer from 'lib/Viewer';
 import NavigatedViewer from 'lib/NavigatedViewer';
 
+import RoughRenderer from 'lib/draw/RoughRenderer';
+
 import TestContainer from 'mocha-test-container-support';
 
 import {
   createEvent
 } from '../util/MockEvents';
 
+function appendStylesheet(url, done) {
+  var stylesheet = document.createElement('link');
+
+  stylesheet.href = url;
+  stylesheet.rel = 'stylesheet';
+  stylesheet.type = 'text/css';
+  stylesheet.onload = done;
+
+  document.getElementsByTagName('head')[0].appendChild(stylesheet);
+}
 
 describe('Modeler', function() {
 
@@ -19,7 +31,7 @@ describe('Modeler', function() {
     container = TestContainer.get(this);
   });
 
-  afterEach(function() {
+  false && afterEach(function() {
     if (modeler) {
       modeler.destroy();
     }
@@ -33,7 +45,25 @@ describe('Modeler', function() {
       container: container,
       keyboard: {
         bindTo: document
-      }
+      },
+      textRenderer: {
+        defaultStyle: {
+          fontFamily: '"Nothing You Could Do"',
+          fontWeight: 'bold',
+          fontSize: 12,
+          lineHeight: 16
+        },
+        externalStyle: {
+          fontSize: 12,
+          lineHeight: 16
+        }
+      },
+      additionalModules: [
+        {
+          __init__: [ 'bpmnRenderer' ],
+          bpmnRenderer: [ 'type', RoughRenderer ]
+        }
+      ]
     });
 
     modeler.importXML(xml, function(err, warnings) {
@@ -42,9 +72,15 @@ describe('Modeler', function() {
   }
 
 
-  it('should import simple process', function(done) {
-    var xml = require('../fixtures/bpmn/simple.bpmn');
-    createModeler(xml, done);
+  it.only('should import simple process', function(done) {
+    // var xml = require('../fixtures/bpmn/simple.bpmn');
+    var xml = require('./kitchen-sink.bpmn');
+
+    appendStylesheet('https://fonts.googleapis.com/css?family=Nothing+You+Could+Do', function() {
+      console.log('Google font loaded!');
+
+      createModeler(xml, done);
+    });
   });
 
 
